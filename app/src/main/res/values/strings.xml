@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">记账本</string>
+    <string name="action_settings">Settings</string>
+    <string name="text_item">项目...</string>
+    <string name="text_price">金额...</string>
+    <string name="btn_add">确认添加</string>
+    <string name="itemname">金额...</string>
+    <string name="total">总计:</string>
+    <string name="newItem">新增项目</string>
+    <string name="editItem">编辑项目</string>
+</resources>
