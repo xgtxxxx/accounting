@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DBManager {
+    public static final int TYPE_ACCOUNT = 0;
+    public static final int TYPE_BUDGET = 1;
     private DBHelper helper;
     private SQLiteDatabase db;
 
@@ -20,7 +22,7 @@ public class DBManager {
     }
 
     public void add(Item item) {
-        db.execSQL("INSERT INTO accounting VALUES(null, ?, ?, ?, ?)", new Object[]{item.getName(), item.getPrice(), item.getAddDate(), item.getRemark()});
+        db.execSQL("INSERT INTO accounting VALUES(null, ?, ?, ?, ?, ?)", new Object[]{item.getName(), item.getPrice(), item.getAddDate(), item.getRemark(), item.getType()});
     }
 
     public void update(Item item) {
@@ -29,6 +31,7 @@ public class DBManager {
         cv.put("price",item.getPrice());
         cv.put("addDate",item.getAddDate());
         cv.put("remark",item.getRemark());
+        cv.put("type",item.getType());
         db.update("accounting", cv, "id = ?", new String[]{String.valueOf(item.getId())});
     }
 
@@ -50,9 +53,9 @@ public class DBManager {
         return null;
     }
 
-    public List<Item> query() {
+    public List<Item> query(int type) {
         List<Item> items = new ArrayList<Item>();
-        Cursor c = queryTheCursor();
+        Cursor c = queryTheCursor(type);
         while (c.moveToNext()) {
             Item item = new Item();
             item.setId(c.getInt(0));
@@ -66,8 +69,8 @@ public class DBManager {
         return items;
     }
 
-    public Cursor queryTheCursor() {
-        Cursor c = db.rawQuery("SELECT * FROM accounting order by id desc", null);
+    public Cursor queryTheCursor(int type) {
+        Cursor c = db.rawQuery("SELECT * FROM accounting where type=? order by id desc", new String[]{String.valueOf(type)});
         return c;
     }
 

@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 public class MyAdapter extends SimpleAdapter {
+    private int[] colors = new int[]{0x30FFFFFF, 0x30EEEEEE};
     /**
      * Constructor
      *
@@ -26,5 +27,12 @@ public class MyAdapter extends SimpleAdapter {
      */
     public MyAdapter(Context context, List<? extends Map<String, ?>> data, int resource, String[] from, int[] to) {
         super(context, data, resource, from, to);
+    }
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+        View view = super.getView(position, convertView, parent);
+        int colorPos = position % colors.length;
+        view.setBackgroundColor(colors[colorPos]);
+        return view;
     }
 }

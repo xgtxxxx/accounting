@@ -8,6 +8,16 @@ public class Item {
     private double price;
     private String addDate;
 
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
+    }
+
+    private int type;
+
     public String getRemark() {
         return remark;
     }

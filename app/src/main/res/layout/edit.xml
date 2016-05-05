@@ -1,70 +1,81 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:orientation="vertical"
-    android:layout_marginTop="10dip"
-    android:id="@+id/edit">
-
-    <TextView
-        android:layout_width="wrap_content"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <!-- Header aligned to top -->
+    <RelativeLayout
+        android:id="@+id/editheader"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="16pt"
-        android:text="@string/newItem"
-        android:id="@+id/title" />
-
-    <TextView
-        android:layout_width="fill_parent"
-        android:layout_marginTop="10dip"
-        android:layout_height="wrap_content"
-        android:text="项目名称" />
-
-    <EditText
-        android:id="@+id/itemName"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:maxLength="20" />
-
-    <TextView
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="金额" />
-
-    <EditText
-        android:id="@+id/itemMoney"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:maxLength="20"
-        android:numeric="decimal" />
-
-    <TextView
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="备注" />
-
-    <EditText
-        android:id="@+id/itemRemark"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:inputType="textMultiLine" />
-
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_alignParentTop="true"
+        android:background="#000000"
+        android:gravity="center">
+        <ImageView
+            android:id="@+id/btnSave"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:maxHeight="50dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:src="@drawable/save"/>
+        <ImageView
+            android:id="@+id/btnCancel"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:maxHeight="50dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:src="@drawable/back"
+            android:maxWidth="50dp" />
+    </RelativeLayout>
+    <!-- Content below header and above footer -->
+    <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:orientation="horizontal">
+        android:layout_below="@id/editheader"
+        android:gravity="top">
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:orientation="vertical"
+            android:layout_marginTop="10dip"
+            android:id="@+id/edit">
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_marginTop="10dip"
+                android:layout_height="wrap_content"
+                android:text="项目名称" />
 
-        <Button
-            android:id="@+id/btnSave"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:width="80px"
-            android:text="保存" />
+            <EditText
+                android:id="@+id/itemName"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:maxLength="20" />
 
-        <Button
-            android:id="@+id/btnCancel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:width="80px"
-            android:text="取消"/>
-    </LinearLayout>
-</LinearLayout>
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="金额" />
+
+            <EditText
+                android:id="@+id/itemMoney"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:maxLength="20"
+                android:numeric="signed" />
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="备注" />
+
+            <EditText
+                android:id="@+id/itemRemark"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textMultiLine" />
+        </LinearLayout>
+    </RelativeLayout>
+</RelativeLayout>

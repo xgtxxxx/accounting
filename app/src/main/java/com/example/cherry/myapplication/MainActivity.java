@@ -2,14 +2,19 @@ package com.example.cherry.myapplication;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
@@ -25,6 +30,11 @@ public class MainActivity extends Activity {
     private ListView listView;
 
     private TextView total;
+    private RadioGroup group;
+    private RadioButton accBtn;
+    private RadioButton budgetBtn;
+
+    private int type;
 
     private List<HashMap<String, Object>> data = new ArrayList<HashMap<String, Object>>();
 
@@ -33,36 +43,20 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         dbManager = new DBManager(this);
-        total = (TextView)this.findViewById(R.id.totalMoney);
+        total = (TextView) this.findViewById(R.id.totalMoney);
         listView = (ListView) this.findViewById(R.id.listView);
-        //获取到集合数据
-        List<Item> items = getItems();
-        for (Item i : items) {
-            HashMap<String, Object> item = new HashMap<String, Object>();
-            item.put("id", i.getId());
-            item.put("name", i.getName());
-            item.put("price", i.getPrice());
-            item.put("addDate", i.getAddDate());
-            item.put("remark",i.getRemark());
-            data.add(item);
-        }
-        initTotal();
-        //创建SimpleAdapter适配器将数据绑定到item显示控件上
-        SimpleAdapter adapter = new MyAdapter(this, data, R.layout.items,
-                new String[]{"id", "name", "price", "addDate"}, new int[]{R.id.id, R.id.name, R.id.price, R.id.addDate});
-        //实现列表的显示
-        listView.setAdapter(adapter);
+        group = (RadioGroup) this.findViewById(R.id.radioGroup);
+        accBtn = (RadioButton) this.findViewById(R.id.btn_account);
+        budgetBtn = (RadioButton) this.findViewById(R.id.btn_budget);
+        addRadioChangeListener();
+        initView();
+        setViewClickListener();
         ItemOnLongClick1(listView);
-
-
-        Button addBtn = (Button)this.findViewById(R.id.newAdd);
+        ImageButton addBtn = (ImageButton) this.findViewById(R.id.newAdd);
         addBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this,EditItem.class);
-                intent.putExtra("store", "from activityMain");
-                startActivityForResult(intent, 1);
-                finish();
+                toAddPage();
             }
         });
     }
@@ -70,19 +64,18 @@ public class MainActivity extends Activity {
     private void ItemOnLongClick1(ListView mListView) {
         mListView.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
             public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-                menu.add(0, 0, 0, "修改");
+                menu.add(0, 0, 0, "转移");
                 menu.add(0, 1, 0, "删除");
             }
         });
     }
 
     public boolean onContextItemSelected(MenuItem item) {
-
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
         Map<String, Object> row = data.get(info.position);
         switch (item.getItemId()) {
             case 0:
-                toEditPage(row);
+                updateType(row);
                 break;
             case 1:
                 if(doDelete(String.valueOf(row.get("id")))){
@@ -94,38 +87,122 @@ public class MainActivity extends Activity {
                     }
                 }
                 break;
-
             default:
                 break;
         }
-
         return super.onContextItemSelected(item);
-
     }
 
-    private void toEditPage(Map<String, Object> row){
-        Intent intent = new Intent(this,EditItem.class);
+    private void initView(){
+        int type1 = getIntent().getIntExtra("type", 0);
+        if(type1==0){
+            refreshData(getAccountItems());
+        }else{
+            budgetBtn.setChecked(true);
+            refreshData(getBudgetItems());
+        }
+    }
+
+    private void setViewClickListener(){
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Map<String, Object> item = (Map<String, Object>) parent.getAdapter().getItem(position);
+                toEditPage(item);
+            }
+        });
+    }
+
+    private void addRadioChangeListener(){
+        group.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup rg, int checkedId) {
+                if (accBtn.getId() == checkedId) {
+                    refreshData(getAccountItems());
+                } else if (budgetBtn.getId() == checkedId) {
+                    refreshData(getBudgetItems());
+                }
+            }
+        });
+    }
+
+    private void refreshData(final List<Item> items){
+        data.clear();
+        for (Item i : items) {
+            HashMap<String, Object> item = new HashMap<String, Object>();
+            item.put("id", i.getId());
+            item.put("name", i.getName());
+            item.put("price", i.getPrice());
+            item.put("addDate", i.getAddDate());
+            item.put("remark", i.getRemark());
+            data.add(item);
+        }
+        initTotal();
+
+        SimpleAdapter adapter = new MyAdapter(this, data, R.layout.items,
+                new String[]{"id", "name", "price", "addDate"}, new int[]{R.id.id, R.id.name, R.id.price, R.id.addDate});
+        listView.setAdapter(adapter);
+    }
+
+    private void updateType(Map<String,Object> row){
+        if(type==DBManager.TYPE_BUDGET){
+            row.put("typeflag", DBManager.TYPE_ACCOUNT);
+        }else{
+            row.put("typeflag",DBManager.TYPE_BUDGET);
+        }
+        toEditPage(row);
+    }
+
+    private void toEditPage(Map<String, Object> row) {
+        Intent intent = new Intent(this, EditItem.class);
         intent.putExtra("store", "from activityMain");
-        intent.putExtra("itemId",String.valueOf(row.get("id")));
+        intent.putExtra("itemId", String.valueOf(row.get("id")));
+        if(row.get("typeflag")==null){
+            setType(intent);
+        }else{
+            intent.putExtra("type", (Integer)row.get("typeflag"));
+        }
         startActivityForResult(intent, 1);
         finish();
     }
 
-    private boolean doDelete(String id){
+    private void toAddPage(){
+        Intent intent = new Intent(MainActivity.this, EditItem.class);
+        intent.putExtra("store", "from activityMain");
+        setType(intent);
+        startActivityForResult(intent, 1);
+        finish();
+    }
+
+    private void setType(Intent intent){
+        if(budgetBtn.getId()==group.getCheckedRadioButtonId()){
+            intent.putExtra("type", DBManager.TYPE_BUDGET);
+        }else {
+            intent.putExtra("type",DBManager.TYPE_ACCOUNT);
+        }
+    }
+
+    private boolean doDelete(String id) {
         dbManager.delete(id);
         return true;
     }
 
-    private void initTotal(){
+    private void initTotal() {
         double m = 0;
-        for(Map<String,Object> row: data){
+        for (Map<String, Object> row : data) {
             m += Double.parseDouble(String.valueOf(row.get("price")));
         }
         total.setText(String.valueOf(m));
     }
 
-    private List<Item> getItems() {
-        return dbManager.query();
+    private List<Item> getAccountItems() {
+        type = DBManager.TYPE_ACCOUNT;
+        return dbManager.query(DBManager.TYPE_ACCOUNT);
+    }
+
+    private List<Item> getBudgetItems() {
+        type = DBManager.TYPE_BUDGET;
+        return dbManager.query(DBManager.TYPE_BUDGET);
     }
 
     /**
@@ -134,7 +211,6 @@ public class MainActivity extends Activity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
-            System.out.println("====================================");
             finish();
             return true;
         }

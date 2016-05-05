@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class DBHelper extends SQLiteOpenHelper{
     private static final String DATABASE_NAME = "accounting.db";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
 
     public DBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -20,7 +20,8 @@ public class DBHelper extends SQLiteOpenHelper{
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("ALTER TABLE accounting ADD COLUMN remark VARCHAR");
+        db.execSQL("ALTER TABLE accounting ADD COLUMN type INTEGER");
+        db.execSQL("update accounting set type=0");
         onCreate(db);
     }
 }
