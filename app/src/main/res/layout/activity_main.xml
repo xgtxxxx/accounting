@@ -54,7 +54,7 @@
         android:layout_alignParentBottom="true"
         android:background="#DDDDDD"
         android:gravity="center">
-
+        <!--
         <RadioGroup
             android:id="@+id/radioGroup"
             android:layout_width="wrap_content"
@@ -73,7 +73,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="预算"></RadioButton>
-        </RadioGroup>
+        </RadioGroup>-->
+
+        <com.example.cherry.myapplication.SegmentView
+            android:layout_width="160dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:id="@+id/btn_seg"
+            />
     </RelativeLayout>
 
 

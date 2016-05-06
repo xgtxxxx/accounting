@@ -2,19 +2,14 @@ package com.example.cherry.myapplication;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListView;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
@@ -30,9 +25,8 @@ public class MainActivity extends Activity {
     private ListView listView;
 
     private TextView total;
-    private RadioGroup group;
-    private RadioButton accBtn;
-    private RadioButton budgetBtn;
+
+    private SegmentView segmentView;
 
     private int type;
 
@@ -45,18 +39,29 @@ public class MainActivity extends Activity {
         dbManager = new DBManager(this);
         total = (TextView) this.findViewById(R.id.totalMoney);
         listView = (ListView) this.findViewById(R.id.listView);
-        group = (RadioGroup) this.findViewById(R.id.radioGroup);
-        accBtn = (RadioButton) this.findViewById(R.id.btn_account);
-        budgetBtn = (RadioButton) this.findViewById(R.id.btn_budget);
-        addRadioChangeListener();
+        segmentView = (SegmentView)this.findViewById(R.id.btn_seg);
         initView();
         setViewClickListener();
         ItemOnLongClick1(listView);
         ImageButton addBtn = (ImageButton) this.findViewById(R.id.newAdd);
+        setSegmentViewClickListener();
         addBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 toAddPage();
+            }
+        });
+    }
+
+    private void setSegmentViewClickListener(){
+        segmentView.setOnSegmentViewClickListener(new SegmentView.onSegmentViewClickListener() {
+            @Override
+            public void onSegmentViewClick(View v, int position) {
+                if (position == 0) {
+                    refreshData(getAccountItems());
+                } else if (position == 1) {
+                    refreshData(getBudgetItems());
+                }
             }
         });
     }
@@ -97,8 +102,9 @@ public class MainActivity extends Activity {
         int type1 = getIntent().getIntExtra("type", 0);
         if(type1==0){
             refreshData(getAccountItems());
+            segmentView.setActive(0);
         }else{
-            budgetBtn.setChecked(true);
+            segmentView.setActive(1);
             refreshData(getBudgetItems());
         }
     }
@@ -109,19 +115,6 @@ public class MainActivity extends Activity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Map<String, Object> item = (Map<String, Object>) parent.getAdapter().getItem(position);
                 toEditPage(item);
-            }
-        });
-    }
-
-    private void addRadioChangeListener(){
-        group.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup rg, int checkedId) {
-                if (accBtn.getId() == checkedId) {
-                    refreshData(getAccountItems());
-                } else if (budgetBtn.getId() == checkedId) {
-                    refreshData(getBudgetItems());
-                }
             }
         });
     }
@@ -148,7 +141,7 @@ public class MainActivity extends Activity {
         if(type==DBManager.TYPE_BUDGET){
             row.put("typeflag", DBManager.TYPE_ACCOUNT);
         }else{
-            row.put("typeflag",DBManager.TYPE_BUDGET);
+            row.put("typeflag", DBManager.TYPE_BUDGET);
         }
         toEditPage(row);
     }
@@ -175,10 +168,10 @@ public class MainActivity extends Activity {
     }
 
     private void setType(Intent intent){
-        if(budgetBtn.getId()==group.getCheckedRadioButtonId()){
-            intent.putExtra("type", DBManager.TYPE_BUDGET);
-        }else {
+        if(segmentView.getActive()==0){
             intent.putExtra("type",DBManager.TYPE_ACCOUNT);
+        }else{
+            intent.putExtra("type", DBManager.TYPE_BUDGET);
         }
     }
 
