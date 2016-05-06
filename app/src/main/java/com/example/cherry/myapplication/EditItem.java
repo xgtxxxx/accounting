@@ -1,6 +1,8 @@
 package com.example.cherry.myapplication;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -9,6 +11,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import java.security.KeyStore;
 
 public class EditItem extends Activity {
     private DBManager dbManager;
@@ -40,13 +44,17 @@ public class EditItem extends Activity {
         save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = getIntent();
-                String itemId = intent.getStringExtra("itemId");
-                int type = intent.getIntExtra("type", 0);
-                if(itemId==null){
-                    doAdd(type);
+                if(isValid()){
+                    Intent intent = getIntent();
+                    String itemId = intent.getStringExtra("itemId");
+                    int type = intent.getIntExtra("type", 0);
+                    if(itemId==null){
+                        doAdd(type);
+                    }else{
+                        doEdit(itemId,type);
+                    }
                 }else{
-                    doEdit(itemId,type);
+                    showErrorMassage();
                 }
             }
         });
@@ -71,6 +79,19 @@ public class EditItem extends Activity {
         return super.onKeyDown(keyCode, event);
     }
 
+    private void showErrorMassage(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(EditItem.this);
+        builder.setMessage("项目名称或者金额不能为空?");
+        builder.setTitle("提示");
+        builder.setPositiveButton("确认", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        builder.create().show();
+    }
+
     private void initEdit(String id){
         Item item = dbManager.get(id);
         if(item!=null){
@@ -78,6 +99,14 @@ public class EditItem extends Activity {
             money.setText(String.valueOf(item.getPrice()));
             remark.setText(item.getRemark());
         }
+    }
+
+    private boolean isValid(){
+        return !isEmpty(name.getText().toString())&&!isEmpty(money.getText().toString());
+    }
+
+    private boolean isEmpty(final String s){
+        return s==null||"".equals(s);
     }
 
     private void doAdd(int type){
