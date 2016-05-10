@@ -6,6 +6,7 @@ import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -49,8 +50,8 @@ public class SegmentView extends LinearLayout {
         textView2 = new TextView(getContext());
         textView1.setClickable(true);
         textView2.setClickable(true);
-        textView1.setLayoutParams(new LayoutParams(0, LayoutParams.WRAP_CONTENT, 1));
-        textView2.setLayoutParams(new LayoutParams(0, LayoutParams.WRAP_CONTENT, 1));
+        textView1.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT, 1));
+        textView2.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT, 1));
         textView1.setText("记账");
         textView2.setText("预算");
         XmlPullParser xrp = getResources().getXml(R.xml.seg_text_color_selector);
@@ -66,6 +67,8 @@ public class SegmentView extends LinearLayout {
         textView1.setPadding(3, 6, 3, 6);
         textView2.setPadding(3, 6, 3, 6);
         setSegmentTextSize(16);
+        textView1.setHeight(dp2px(40));
+        textView2.setHeight(dp2px(40));
         textView1.setBackgroundResource(R.drawable.seg_left);
         textView2.setBackgroundResource(R.drawable.seg_right);
         textView1.setSelected(true);
@@ -145,5 +148,10 @@ public class SegmentView extends LinearLayout {
          * @author RANDY.ZHANG
          */
         public void onSegmentViewClick(View v,int position);
+    }
+
+    private int dp2px(int dp) {
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp,
+                getResources().getDisplayMetrics());
     }
 }
