@@ -66,7 +66,7 @@ public class SegmentView extends LinearLayout {
         textView2.setGravity(Gravity.CENTER);
         textView1.setPadding(3, 6, 3, 6);
         textView2.setPadding(3, 6, 3, 6);
-        setSegmentTextSize(16);
+        setSegmentTextSize(20);
         textView1.setHeight(dp2px(40));
         textView2.setHeight(dp2px(40));
         textView1.setBackgroundResource(R.drawable.seg_left);

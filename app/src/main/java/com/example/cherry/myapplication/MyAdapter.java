@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 public class MyAdapter extends SimpleAdapter {
-    private int[] colors = new int[]{0x30DDDDDD,0x30FFFFFF};
+    private int[] colors = new int[]{0x30d1e6ff,0x30FFFFFF};
     /**
      * Constructor
      *

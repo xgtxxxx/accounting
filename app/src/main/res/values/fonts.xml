@@ -1,0 +1,5 @@
+<resources>
+    <string name="title_size">35dp</string>
+    <string name="table_header_size">30dp</string>
+    <string name="body_size">30dp</string>
+</resources>

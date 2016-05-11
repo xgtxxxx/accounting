@@ -30,6 +30,8 @@ import java.util.Map;
 
 public class MainActivity extends Activity {
 
+    private static final int TEXT_SIZE = 16;
+
     private DBManager dbManager;
 
     private SwipeMenuListView listView;
@@ -54,7 +56,7 @@ public class MainActivity extends Activity {
         initSwipeMenu();
 //        setViewClickListener();
 //        ItemOnLongClick1(listView);
-        ImageView addBtn = (ImageView) this.findViewById(R.id.newAdd);
+        TextView addBtn = (TextView) this.findViewById(R.id.newAdd);
         setSegmentViewClickListener();
         addBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -70,25 +72,25 @@ public class MainActivity extends Activity {
             public void create(SwipeMenu menu) {
                 SwipeMenuItem openItem = new SwipeMenuItem(getApplicationContext());
                 openItem.setBackground(new ColorDrawable(Color.rgb(0xC9, 0xC9, 0xCE)));
-                openItem.setWidth(dp2px(45));
+                openItem.setWidth(dp2px(60));
                 openItem.setTitle("移动");
-                openItem.setTitleSize(12);
+                openItem.setTitleSize(TEXT_SIZE);
                 openItem.setTitleColor(Color.WHITE);
                 menu.addMenuItem(openItem);
 
                 SwipeMenuItem editItem = new SwipeMenuItem(getApplicationContext());
                 editItem.setBackground(new ColorDrawable(Color.rgb(0xF9, 0xC9, 0x1E)));
-                editItem.setWidth(dp2px(45));
+                editItem.setWidth(dp2px(60));
                 editItem.setTitle("编辑");
-                editItem.setTitleSize(12);
+                editItem.setTitleSize(TEXT_SIZE);
                 editItem.setTitleColor(Color.WHITE);
                 menu.addMenuItem(editItem);
 
                 SwipeMenuItem deleteItem = new SwipeMenuItem(getApplicationContext());
                 deleteItem.setBackground(new ColorDrawable(Color.rgb(0xF9,0x3F, 0x25)));
-                deleteItem.setWidth(dp2px(45));
+                deleteItem.setWidth(dp2px(60));
                 deleteItem.setTitle("删除");
-                deleteItem.setTitleSize(12);
+                deleteItem.setTitleSize(TEXT_SIZE);
                 deleteItem.setTitleColor(Color.WHITE);
                 menu.addMenuItem(deleteItem);
             }
@@ -220,6 +222,7 @@ public class MainActivity extends Activity {
             intent.putExtra("type", (Integer) row.get("typeflag"));
         }
         startActivityForResult(intent, 1);
+        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
         finish();
     }
 
@@ -228,6 +231,7 @@ public class MainActivity extends Activity {
         intent.putExtra("store", "from activityMain");
         setType(intent);
         startActivityForResult(intent, 1);
+        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
         finish();
     }
 
@@ -249,7 +253,7 @@ public class MainActivity extends Activity {
         for (Map<String, Object> row : data) {
             m += Double.parseDouble(String.valueOf(row.get("price")));
         }
-        total.setText(String.valueOf(m));
+        total.setText("总额:￥"+String.valueOf(m));
     }
 
     private List<Item> getItems(){

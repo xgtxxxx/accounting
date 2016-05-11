@@ -14,28 +14,34 @@
             android:id="@+id/layout_top"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#000000"
+            android:background="#000010"
             android:orientation="horizontal">
 
             <TextView
-                android:id="@+id/total"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_weight="2"
-                android:text="@string/total"
-                android:paddingLeft="10dp"
-                android:textColor="#FFFFFF"
-                android:textSize="30dip"></TextView>
+            android:id="@+id/totalMoney"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:paddingLeft="10dp"
+            android:layout_weight="10"
+            android:text="0"
+            android:textColor="#FFFFFF"
+            android:textSize="20dp"
+            android:textStyle="bold"
+                android:height="50dp"
+            android:gravity="center|left" />
 
             <TextView
-                android:id="@+id/totalMoney"
+                android:id="@+id/newAdd"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_weight="8"
-                android:text="0"
+                android:text="＋"
                 android:textColor="#FFFFFF"
-                android:textSize="30dip"></TextView>
-
+                android:textSize="28dp"
+                android:textStyle="bold"
+                android:gravity="center|left"
+                android:foregroundGravity="center_vertical"
+                android:layout_marginRight="10dp" />
+<!--
             <ImageView
                 android:id="@+id/newAdd"
                 android:layout_width="40dp"
@@ -44,7 +50,7 @@
                 android:scaleType="centerCrop"
                 android:src="@drawable/ic_input_add" />
 
-
+-->
         </LinearLayout>
     </RelativeLayout>
     <!-- Footer aligned to bottom -->
@@ -99,7 +105,7 @@
             android:id="@+id/layout_header"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:background="#777777"
+            android:background="#0099ff"
             android:orientation="horizontal">
 
             <TextView
@@ -109,6 +115,7 @@
                 android:text="序号"
                 android:textColor="#FFFFFF"
                 android:textStyle="bold"
+                android:textSize="@dimen/table_header_size_dp"
                 android:visibility="gone" />
 
             <TextView
@@ -117,7 +124,8 @@
                 android:textColor="#FFFFFF"
                 android:gravity="center_horizontal|center_vertical"
                 android:text="项目名称"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:textSize="@dimen/table_header_size_dp"/>
 
             <TextView
                 android:layout_width="100dp"
@@ -125,7 +133,8 @@
                 android:textColor="#FFFFFF"
                 android:gravity="center_horizontal|center_vertical"
                 android:text="金额"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:textSize="@dimen/table_header_size_dp"/>
 
             <TextView
                 android:layout_width="fill_parent"
@@ -133,7 +142,8 @@
                 android:textColor="#FFFFFF"
                 android:gravity="center_horizontal|center_vertical"
                 android:text="日期"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:textSize="@dimen/table_header_size_dp"/>
         </LinearLayout>
 
         <ScrollView

@@ -20,25 +20,34 @@ public class EditItem extends Activity {
     private EditText name;
     private EditText money;
     private EditText remark;
-    private ImageView save;
-    private ImageView cancel;
+    private TextView save;
+    private TextView cancel;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.edit);
         dbManager = new DBManager(this);
-
         name = (EditText)this.findViewById(R.id.itemName);
+        name.requestFocus();
         money = (EditText)this.findViewById(R.id.itemMoney);
         remark = (EditText)this.findViewById(R.id.itemRemark);
-        save = (ImageView)this.findViewById(R.id.btnSave);
-        cancel = (ImageView)this.findViewById(R.id.btnCancel);
+        save = (TextView)this.findViewById(R.id.btnSave);
+        cancel = (TextView)this.findViewById(R.id.btnCancel);
+        TextView title = (TextView)this.findViewById(R.id.edit_title);
 
         Intent intent = getIntent();
         String itemId = intent.getStringExtra("itemId");
+        int type = intent.getIntExtra("type", 0);
+        String typename = "记账";
+        if(type==1){
+            typename = "预算";
+        }
         if(itemId!=null){
+            title.setText("修改"+typename);
             initEdit(itemId);
+        }else{
+            title.setText("新增"+typename);
         }
 
         save.setOnClickListener(new View.OnClickListener() {
@@ -138,6 +147,7 @@ public class EditItem extends Activity {
         int type = thisItement.getIntExtra("type",0);
         intent.putExtra("type", type);
         startActivityForResult(intent, 1);
+        overridePendingTransition(R.anim.slide_in_left,R.anim.slide_out_right);
         finish();
     }
 }

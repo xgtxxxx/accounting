@@ -8,8 +8,51 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:background="#000000"
+        android:background="#000010"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
         android:gravity="center">
+        <EditText
+            android:id="@+id/btnCancel"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:height="50dp"
+            android:textColor="#FFFFFF"
+            android:text="＜"
+            android:focusable="false"
+            android:textSize="24dp"
+            android:textStyle="bold"
+            android:layout_alignParentLeft="true"
+            android:gravity="center|center_vertical"
+            android:theme="@style/Widget.AppCompat.Light.Base.ActionBar" />
+        <EditText
+            android:id="@+id/edit_title"
+            android:layout_width="200dp"
+            android:layout_height="50dp"
+            android:focusable="false"
+            android:height="50dp"
+            android:textColor="#FFFFFF"
+            android:text=""
+            android:textSize="18dp"
+            android:textStyle="bold"
+            android:theme="@style/Widget.AppCompat.Light.Base.ActionBar"
+            android:layout_alignParentTop="true"
+            android:gravity="center_horizontal|center_vertical"
+            android:layout_centerHorizontal="true" />
+        <EditText
+            android:id="@+id/btnSave"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:height="50dp"
+            android:textColor="#FFFFFF"
+            android:focusable="false"
+            android:text="√"
+            android:textSize="24dp"
+            android:textStyle="bold"
+            android:layout_alignParentRight="true"
+            android:gravity="center|center_vertical"
+            android:theme="@style/Widget.AppCompat.Light.Base.ActionBar" />
+        <!--
         <ImageView
             android:id="@+id/btnSave"
             android:layout_width="50dp"
@@ -33,6 +76,7 @@
             android:maxWidth="50dp"
             android:padding="5dp"
             android:layout_marginLeft="10dp" />
+            -->
     </RelativeLayout>
     <!-- Content below header and above footer -->
     <RelativeLayout
@@ -52,32 +96,43 @@
                 android:layout_width="fill_parent"
                 android:layout_marginTop="10dip"
                 android:layout_height="wrap_content"
-                android:text="项目名称" />
+                android:text="项目名称"
+                android:textSize="@dimen/body_size_dp"/>
 
             <EditText
                 android:id="@+id/itemName"
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="30dp"
                 android:background="@drawable/edit_bg"
-                android:maxLength="20" />
+                android:maxLength="20"
+                android:textSize="@dimen/body_size_dp"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp" />/>
 
             <TextView
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="金额" />
+                android:text="金额"
+                android:textSize="@dimen/body_size_dp"
+                android:layout_marginTop="10dp" />/>
 
             <EditText
                 android:id="@+id/itemMoney"
                 android:layout_width="fill_parent"
                 android:background="@drawable/edit_bg"
-                android:layout_height="wrap_content"
+                android:layout_height="30dp"
                 android:maxLength="20"
-                android:numeric="signed" />
+                android:numeric="signed"
+                android:textSize="@dimen/body_size_dp"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp" />/>
 
             <TextView
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="备注" />
+                android:text="备注"
+                android:textSize="@dimen/body_size_dp"
+                android:layout_marginTop="10dp" />/>
 
             <EditText
                 android:id="@+id/itemRemark"
@@ -86,7 +141,10 @@
                 android:background="@drawable/edit_bg"
                 android:inputType="textMultiLine"
                 android:minLines="6"
-                android:gravity="top|left" />
+                android:gravity="top|left"
+                android:textSize="@dimen/body_size_dp"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp" />/>
         </LinearLayout>
     </RelativeLayout>
 </RelativeLayout>
