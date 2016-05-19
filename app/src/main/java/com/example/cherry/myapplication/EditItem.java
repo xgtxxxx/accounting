@@ -7,8 +7,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Filter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -22,6 +25,7 @@ public class EditItem extends Activity {
     private EditText remark;
     private TextView save;
     private TextView cancel;
+    private AutoCompleteTextView autoCompleteTextView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -35,7 +39,8 @@ public class EditItem extends Activity {
         save = (TextView)this.findViewById(R.id.btnSave);
         cancel = (TextView)this.findViewById(R.id.btnCancel);
         TextView title = (TextView)this.findViewById(R.id.edit_title);
-
+        autoCompleteTextView = (AutoCompleteTextView)findViewById(R.id.subject);
+        initSubjects();
         Intent intent = getIntent();
         String itemId = intent.getStringExtra("itemId");
         int type = intent.getIntExtra("type", 0);
@@ -67,13 +72,19 @@ public class EditItem extends Activity {
                 }
             }
         });
-
         cancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 returnMainView();
             }
         });
+    }
+
+    private void initSubjects(){
+        String subjects[] = dbManager.getSubjects();
+        MyArrayAdapter<String> adapter = new MyArrayAdapter<String>(this,
+                android.R.layout.simple_dropdown_item_1line, subjects);
+        autoCompleteTextView.setAdapter(adapter);
     }
 
     /**
@@ -90,7 +101,7 @@ public class EditItem extends Activity {
 
     private void showErrorMassage(){
         AlertDialog.Builder builder = new AlertDialog.Builder(EditItem.this);
-        builder.setMessage("项目名称或者金额不能为空?");
+        builder.setMessage("项目名称,金额和类别不能为空?");
         builder.setTitle("提示");
         builder.setPositiveButton("确认", new DialogInterface.OnClickListener() {
             @Override
@@ -107,11 +118,12 @@ public class EditItem extends Activity {
             name.setText(item.getName());
             money.setText(String.valueOf(item.getPrice()));
             remark.setText(item.getRemark());
+            autoCompleteTextView.setText(item.getSubject());
         }
     }
 
     private boolean isValid(){
-        return !isEmpty(name.getText().toString())&&!isEmpty(money.getText().toString());
+        return !isEmpty(name.getText().toString())&&!isEmpty(money.getText().toString())&&!isEmpty(autoCompleteTextView.getText().toString());
     }
 
     private boolean isEmpty(final String s){
@@ -125,6 +137,7 @@ public class EditItem extends Activity {
         item.setPrice(Double.parseDouble(money.getText().toString()));
         item.setRemark(remark.getText().toString());
         item.setType(type);
+        item.setSubject(autoCompleteTextView.getText().toString());
         dbManager.add(item);
         returnMainView();
     }
@@ -137,6 +150,7 @@ public class EditItem extends Activity {
         item.setPrice(Double.parseDouble(money.getText().toString()));
         item.setRemark(remark.getText().toString());
         item.setType(type);
+        item.setSubject(autoCompleteTextView.getText().toString());
         dbManager.update(item);
         returnMainView();
     }

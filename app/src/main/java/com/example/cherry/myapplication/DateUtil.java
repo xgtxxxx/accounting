@@ -1,5 +1,7 @@
 package com.example.cherry.myapplication;
 
+import android.graphics.Color;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 

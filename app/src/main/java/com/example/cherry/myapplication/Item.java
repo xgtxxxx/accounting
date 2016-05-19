@@ -8,6 +8,17 @@ public class Item {
     private double price;
     private String addDate;
 
+    private String subject;
+    private int attention;
+
+    public String getSubject() {
+        return subject;
+    }
+
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
+
     public int getType() {
         return type;
     }
@@ -58,5 +69,12 @@ public class Item {
 
     public void setAddDate(String addDate) {
         this.addDate = addDate;
+    }
+
+    public int getAttention() {
+        return attention;
+    }
+    public void setAttention(final int attention){
+        this.attention = attention;
     }
 }

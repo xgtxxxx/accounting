@@ -15,26 +15,36 @@
         />
     <!-- 名称 -->
     <TextView
-        android:layout_width="150dp"
+        android:layout_width="199dp"
         android:layout_height="match_parent"
         android:gravity="center_horizontal|center_vertical"
         android:id="@+id/name"
+        android:clickable="true"
+        android:onClick="showChildren"
         android:textSize="@dimen/body_size_dp"
         />
-    <!-- 电话 -->
     <TextView
-        android:layout_width="100dp"
+        android:layout_width="113dp"
         android:layout_height="match_parent"
         android:gravity="center_horizontal|center_vertical"
         android:id="@+id/price"
         android:textSize="@dimen/body_size_dp"
         />
-    <!-- 存款 -->
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="match_parent"
         android:gravity="center_horizontal|center_vertical"
         android:id="@+id/addDate"
+        android:visibility="gone"
+        android:textSize="@dimen/body_size_dp"
+        />
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_horizontal|center_vertical"
+        android:id="@+id/attention_row"
+        android:clickable="true"
+        android:onClick="doAttention"
         android:textSize="@dimen/body_size_dp"
         />
 </LinearLayout>

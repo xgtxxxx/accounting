@@ -52,31 +52,6 @@
             android:layout_alignParentRight="true"
             android:gravity="center|center_vertical"
             android:theme="@style/Widget.AppCompat.Light.Base.ActionBar" />
-        <!--
-        <ImageView
-            android:id="@+id/btnSave"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:maxHeight="50dp"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"
-            android:src="@drawable/save1"
-            android:padding="5dp"
-            android:layout_marginRight="10dp" />
-        <ImageView
-            android:id="@+id/btnCancel"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:maxHeight="50dp"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:src="@drawable/back"
-            android:maxWidth="50dp"
-            android:padding="5dp"
-            android:layout_marginLeft="10dp" />
-            -->
     </RelativeLayout>
     <!-- Content below header and above footer -->
     <RelativeLayout
@@ -107,14 +82,14 @@
                 android:maxLength="20"
                 android:textSize="@dimen/body_size_dp"
                 android:paddingLeft="5dp"
-                android:paddingRight="5dp" />/>
+                android:paddingRight="5dp" />
 
             <TextView
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:text="金额"
                 android:textSize="@dimen/body_size_dp"
-                android:layout_marginTop="10dp" />/>
+                android:layout_marginTop="10dp" />
 
             <EditText
                 android:id="@+id/itemMoney"
@@ -125,14 +100,31 @@
                 android:numeric="signed"
                 android:textSize="@dimen/body_size_dp"
                 android:paddingLeft="5dp"
-                android:paddingRight="5dp" />/>
+                android:paddingRight="5dp" />
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="分类"
+                android:textSize="@dimen/body_size_dp"
+                android:layout_marginTop="10dp" />
+
+            <AutoCompleteTextView
+                android:id="@+id/subject"
+                android:layout_width="fill_parent"
+                android:background="@drawable/edit_bg"
+                android:layout_height="30dp"
+                android:maxLength="20"
+                android:textSize="@dimen/body_size_dp"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"/>
 
             <TextView
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:text="备注"
                 android:textSize="@dimen/body_size_dp"
-                android:layout_marginTop="10dp" />/>
+                android:layout_marginTop="10dp" />
 
             <EditText
                 android:id="@+id/itemRemark"
@@ -144,7 +136,7 @@
                 android:gravity="top|left"
                 android:textSize="@dimen/body_size_dp"
                 android:paddingLeft="5dp"
-                android:paddingRight="5dp" />/>
+                android:paddingRight="5dp" />
         </LinearLayout>
     </RelativeLayout>
 </RelativeLayout>
