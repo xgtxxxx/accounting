@@ -92,7 +92,7 @@
                 android:layout_height="40dp"
                 android:textColor="#FFFFFF"
                 android:gravity="center_horizontal|center_vertical"
-                android:text="项目▼"
+                android:text="项目▲"
                 android:textStyle="bold"
                 android:textSize="@dimen/table_header_size_dp"/>
 
@@ -125,8 +125,7 @@
             android:layout_below="@id/layout_header">
 
         </ScrollView>
-
-        <com.baoyz.swipemenulistview.SwipeMenuListView
+        <ExpandableListView
             android:id="@+id/listView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

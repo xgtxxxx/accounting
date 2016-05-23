@@ -25,6 +25,7 @@ public class EditItem extends Activity {
     private EditText remark;
     private TextView save;
     private TextView cancel;
+    private TextView delete;
     private AutoCompleteTextView autoCompleteTextView;
 
     @Override
@@ -38,11 +39,12 @@ public class EditItem extends Activity {
         remark = (EditText)this.findViewById(R.id.itemRemark);
         save = (TextView)this.findViewById(R.id.btnSave);
         cancel = (TextView)this.findViewById(R.id.btnCancel);
+        delete = (TextView)this.findViewById(R.id.btnDelete);
         TextView title = (TextView)this.findViewById(R.id.edit_title);
         autoCompleteTextView = (AutoCompleteTextView)findViewById(R.id.subject);
         initSubjects();
         Intent intent = getIntent();
-        String itemId = intent.getStringExtra("itemId");
+        final String itemId = intent.getStringExtra("itemId");
         int type = intent.getIntExtra("type", 0);
         String typename = "记账";
         if(type==1){
@@ -50,8 +52,10 @@ public class EditItem extends Activity {
         }
         if(itemId!=null){
             title.setText("修改"+typename);
+            delete.setVisibility(View.VISIBLE);
             initEdit(itemId);
         }else{
+            delete.setVisibility(View.GONE);
             title.setText("新增"+typename);
         }
 
@@ -76,6 +80,30 @@ public class EditItem extends Activity {
             @Override
             public void onClick(View v) {
                 returnMainView();
+            }
+        });
+
+        delete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(EditItem.this);
+                builder.setMessage("确定要删除?");
+                builder.setTitle("提示");
+                builder.setNegativeButton("确认", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dbManager.delete(itemId);
+                        returnMainView();
+                        dialog.dismiss();
+                    }
+                });
+                builder.setPositiveButton("取消", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+                builder.create().show();
             }
         });
     }

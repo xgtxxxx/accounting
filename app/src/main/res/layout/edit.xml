@@ -52,6 +52,20 @@
             android:layout_alignParentRight="true"
             android:gravity="center|center_vertical"
             android:theme="@style/Widget.AppCompat.Light.Base.ActionBar" />
+        <EditText
+            android:id="@+id/btnDelete"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:height="50dp"
+            android:textColor="#fd9ea7"
+            android:focusable="false"
+            android:text="×"
+            android:textSize="26dp"
+            android:textStyle="bold"
+            android:layout_alignParentRight="true"
+            android:gravity="center|center_vertical"
+            android:layout_marginRight="30dp"
+            android:theme="@style/Widget.AppCompat.Light.Base.ActionBar" />
     </RelativeLayout>
     <!-- Content below header and above footer -->
     <RelativeLayout

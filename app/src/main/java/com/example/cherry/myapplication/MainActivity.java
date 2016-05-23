@@ -1,35 +1,27 @@
 package com.example.cherry.myapplication;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.TypedValue;
-import android.view.ContextMenu;
 import android.view.KeyEvent;
-import android.view.MenuItem;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ImageView;
+import android.view.ViewGroup;
+import android.widget.BaseExpandableListAdapter;
+import android.widget.ExpandableListView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
-import com.baoyz.swipemenulistview.SwipeMenu;
-import com.baoyz.swipemenulistview.SwipeMenuCreator;
-import com.baoyz.swipemenulistview.SwipeMenuItem;
-import com.baoyz.swipemenulistview.SwipeMenuListView;
-
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -39,7 +31,7 @@ public class MainActivity extends Activity {
 
     private DBManager dbManager;
 
-    private SwipeMenuListView listView;
+    private ExpandableListView listView;
 
     private TextView total;
 
@@ -47,15 +39,9 @@ public class MainActivity extends Activity {
 
     private int type;
 
-    private boolean isAttention;
-    private boolean isSubject;
+    private Filter filter = new Filter();
 
-    private int currentSortFlag = 0;
-    private String currentSortText = "金额";
-
-    private List<HashMap<String, Object>> data = new ArrayList<HashMap<String, Object>>();
-
-    private List<HashMap<String,Object>> currentViewData = new ArrayList<HashMap<String, Object>>();
+    private MyExpandableListAdapter myAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,23 +49,25 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         dbManager = new DBManager(this);
         total = (TextView) this.findViewById(R.id.totalMoney);
-        listView = (SwipeMenuListView) this.findViewById(R.id.listView);
+        listView = (ExpandableListView) this.findViewById(R.id.listView);
         segmentView = (SegmentView)this.findViewById(R.id.btn_seg);
+        initAddBtnClickListener();
+        initTypeFilter();
+        initAttentionFilter();
+        initPriceSortFilter();
+        initSubjectSortFilter();
+        initChildClickEvent();
         initView();
-        initSwipeMenu();
-        setViewClickListener();
-//        ItemOnLongClick1(listView);
+    }
+
+    private void initAddBtnClickListener(){
         TextView addBtn = (TextView) this.findViewById(R.id.newAdd);
-        setSegmentViewClickListener();
         addBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 toAddPage();
             }
         });
-        initSortListener((TextView) this.findViewById(R.id.priceview));
-        initAttentionClickListener();
-        initSubjectOnClickListener();
     }
 
     public void doAttention(View view){
@@ -88,75 +76,30 @@ public class MainActivity extends Activity {
         TextView idView = (TextView)ll.getChildAt(0);
         int id = Integer.parseInt(idView.getText().toString());
         if(id>0){
-            HashMap<String,Object> row = getRowWithId(id);
+            Item row = getItemById(id);
             if(Color.parseColor("lightgrey")==tv.getTextColors().getDefaultColor()){
-                row.put("attention",1);
+                row.setAttention(1);
                 tv.setTextColor(Color.parseColor("black"));
             }else{
-                row.put("attention",0);
+                row.setAttention(0);
                 tv.setTextColor(Color.parseColor("lightgrey"));
             }
-            dbManager.update(toItem(row));
+            dbManager.update(row);
         }
     }
 
-    //未完待续
-    public void showChildren(View view){
-        TextView tv = (TextView)view;
-        LinearLayout ll = (LinearLayout)tv.getParent();
-        TextView idView = (TextView)ll.getChildAt(0);
-        int id = Integer.parseInt(idView.getText().toString());
-        if(id==0){
-            HashMap<String,Object> row = getRowWithId(id);
-        }
-    }
-
-    private HashMap<String,Object> getRowWithId(int id){
-        for(HashMap<String,Object> row:data){
-            if(((Integer)row.get("id")).intValue()==id){
-                return row;
+    private Item getItemById(int id){
+        for(ExpandableItem item : myAdapter.getMap().values()){
+            for(Item child : item.getChildren()){
+                if(child.getId()==id){
+                    return child;
+                }
             }
         }
         return null;
     }
 
-    private void filterData(){
-        List<HashMap<String, Object>> datas = new ArrayList<HashMap<String, Object>>();
-        if(isAttention){
-            for (HashMap<String, Object> row : data) {
-                if ((Integer) row.get("attention") == 1) {
-                    datas.add(row);
-                }
-            }
-        }else{
-            datas = new ArrayList<HashMap<String, Object>>(data);
-        }
-
-        if(isSubject){
-            datas = mergeBySubject(datas);
-        }
-        datas = sort(currentSortFlag,currentSortText,datas);
-        refreshView(datas);
-    }
-
-    private List<HashMap<String,Object>> mergeBySubject(final List<HashMap<String, Object>> datas){
-        Map<String,SubjectData> rows = new HashMap<String, SubjectData>();
-        for(HashMap<String,Object> d: datas){
-            SubjectData sd = rows.get((String)d.get("subject"));
-            if(sd==null){
-                sd = new SubjectData((String)d.get("subject"));
-            }
-            sd.addData(d);
-            rows.put((String)d.get("subject"),sd);
-        }
-        List<HashMap<String,Object>> list = new ArrayList<HashMap<String, Object>>();
-        for(SubjectData sd: rows.values()){
-            list.add(sd.toSubjectData());
-        }
-        return list;
-    }
-
-    private void initAttentionClickListener(){
+    private void initAttentionFilter(){
         TextView tv = (TextView)this.findViewById(R.id.attention);
         tv.setTextSize(24);
         tv.setOnClickListener(new View.OnClickListener() {
@@ -167,25 +110,17 @@ public class MainActivity extends Activity {
                 int c = list.getDefaultColor();
                 if(c!=-1){
                     tv.setTextColor(-1);
-//                        refreshView(data);
-                    isAttention = false;
+                    filter.setIsAttention(false);
                 }else{
                     tv.setTextColor(Color.parseColor("black"));
-//                        List<HashMap<String, Object>> attentions = new ArrayList<HashMap<String, Object>>();
-//                        for (HashMap<String, Object> row : data) {
-//                            if ((Integer) row.get("attention") == 1) {
-//                                attentions.add(row);
-//                            }
-//                        }
-//                        refreshView(attentions);
-                    isAttention = true;
+                    filter.setIsAttention(true);
                 }
-                filterData();
+                filterData(getItems());
             }
         });
     }
 
-    private void initSubjectOnClickListener(){
+    private void initSubjectSortFilter(){
         TextView tv = (TextView)this.findViewById(R.id.subject_btn);
         tv.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -193,114 +128,38 @@ public class MainActivity extends Activity {
                 TextView textView = (TextView) v;
                 if ("项目▼".equals(textView.getText().toString())) {
                     textView.setText("项目▲");
-                    isSubject = true;
+                    filter.setIsExpand(true);
                 } else {
                     textView.setText("项目▼");
-//                    refreshView(currentViewData);
-                    isSubject = false;
+                    filter.setIsExpand(false);
                 }
-                filterData();
+                sort(getCurrentDatas());
             }
         });
     }
 
-    private void initSortListener(final TextView priceView){
+    private void initPriceSortFilter(){
+        TextView priceView = (TextView)this.findViewById(R.id.priceview);
         priceView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 TextView tv = (TextView) v;
                 String text = tv.getText().toString();
-                if ("金额".equals(text)) {
-                    sort(1, "金额↑", null);
+                if ("金额↓".equals(text)) {
+                    filter.setPriceSort(1);
+                    tv.setText("金额↑");
+                    sort(getCurrentDatas());
                 } else if ("金额↑".equals(text)) {
-                    sort(2, "金额↓", null);
-                } else {
-                    sort(0, "金额", null);
+                    filter.setPriceSort(0);
+                    tv.setText("金额");
+                    filterData(getItems());
+                } else{
+                    filter.setPriceSort(2);
+                    tv.setText("金额↓");
+                    sort(getCurrentDatas());
                 }
             }
         });
-    }
-
-    private void initSwipeMenu(){
-        SwipeMenuCreator creator = new SwipeMenuCreator() {
-            @Override
-            public void create(SwipeMenu menu) {
-//                SwipeMenuItem openItem = new SwipeMenuItem(getApplicationContext());
-//                openItem.setBackground(new ColorDrawable(Color.rgb(0xC9, 0xC9, 0xCE)));
-//                openItem.setWidth(dp2px(80));
-//                openItem.setTitle("关注");
-//                openItem.setTitleSize(TEXT_SIZE);
-//                openItem.setTitleColor(Color.WHITE);
-//                menu.addMenuItem(openItem);
-//                //默认值0==关注
-//                //==取消关注
-//                if(menu.getViewType()==1){
-//                    openItem.setTitle("取消关注");
-//                }
-
-                SwipeMenuItem editItem = new SwipeMenuItem(getApplicationContext());
-                editItem.setBackground(new ColorDrawable(Color.rgb(0xF9, 0xC9, 0x1E)));
-                editItem.setWidth(dp2px(80));
-                editItem.setTitle("编辑");
-                editItem.setTitleSize(TEXT_SIZE);
-                editItem.setTitleColor(Color.WHITE);
-                menu.addMenuItem(editItem);
-
-                SwipeMenuItem deleteItem = new SwipeMenuItem(getApplicationContext());
-                deleteItem.setBackground(new ColorDrawable(Color.rgb(0xF9, 0x3F, 0x25)));
-                deleteItem.setWidth(dp2px(80));
-                deleteItem.setTitle("删除");
-                deleteItem.setTitleSize(TEXT_SIZE);
-                deleteItem.setTitleColor(Color.WHITE);
-                menu.addMenuItem(deleteItem);
-            }
-        };
-        // set creator
-        listView.setMenuCreator(creator);
-        listView.setOnMenuItemClickListener(new SwipeMenuListView.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(int position, SwipeMenu menu, int index) {
-                Map row = data.get(position);
-                switch (index) {
-                    case 0:
-                        toEditPage(row);
-                        break;
-                    case 1:
-                        showDeleteNotice(String.valueOf(row.get("id")), position);
-                        break;
-//                    case 0:
-//                        attention(row, menu);
-//                        break;
-                    default:
-                        break;
-                }
-                return false;
-            }
-        });
-    }
-
-    private void attention(final Map<String,Object> row,final SwipeMenu menu){
-        Integer flag = (Integer)row.get("attention");
-        if(flag==0){
-            row.put("attention",1);
-        }else if(flag==1){
-            row.put("attention",0);
-        }
-        dbManager.update(toItem(row));
-        refreshView(data);
-    }
-
-    private Item toItem(final Map<String,Object> row){
-        Item item = new Item();
-        item.setId((Integer)row.get("id"));
-        item.setName((String)row.get("name"));
-        item.setPrice((Double)row.get("price"));
-        item.setAddDate((String)row.get("addDate"));
-        item.setRemark((String)row.get("remark"));
-        item.setType((Integer)row.get("type"));
-        item.setSubject((String) row.get("subject"));
-        item.setAttention((Integer) row.get("attention"));
-        return item;
     }
 
     private void reset(){
@@ -308,163 +167,144 @@ public class MainActivity extends Activity {
         tv.setTextColor(-1);
 
         tv = (TextView)this.findViewById(R.id.subject_btn);
-        tv.setText("项目▼");
+        tv.setText("项目▲");
 
         tv = (TextView)this.findViewById(R.id.priceview);
         tv.setText("金额");
 
-        isAttention = false;
-        isSubject = false;
-        currentSortFlag = 0;
-        currentSortText = "金额";
+        filter = new Filter();
     }
 
-    private void setSegmentViewClickListener(){
+    private void initTypeFilter(){
         segmentView.setOnSegmentViewClickListener(new SegmentView.onSegmentViewClickListener() {
             @Override
             public void onSegmentViewClick(View v, int position) {
                 reset();
                 if (position == 0) {
-                    refreshData(getAccountItems());
+                    filterData(getAccountItems());
                 } else if (position == 1) {
-                    refreshData(getBudgetItems());
+                    filterData(getBudgetItems());
                 }
             }
         });
     }
 
-    private void ItemOnLongClick1(ListView mListView) {
-        mListView.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
-            public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-                menu.add(0, 0, 0, "转移");
-                menu.add(0, 1, 0, "删除");
+    private void initChildClickEvent(){
+        listView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+            @Override
+            public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+                Item item = (Item) myAdapter.getChild(groupPosition, childPosition);
+                toEditPage(item);
+                return false;
             }
         });
-    }
-
-    public boolean onContextItemSelected(MenuItem item) {
-        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-        Map<String, Object> row = data.get(info.position);
-        switch (item.getItemId()) {
-            case 0:
-                updateType(row);
-                break;
-            case 1:
-                if(doDelete(String.valueOf(row.get("id")))){
-                    data.remove(info.position);
-                    initTotal(data);
-                    if (!data.isEmpty()) {
-                        MyAdapter adapter = (MyAdapter) listView.getAdapter();
-                        adapter.notifyDataSetChanged();
-                    }
-                }
-                break;
-            default:
-                break;
-        }
-        return super.onContextItemSelected(item);
     }
 
     private void initView(){
         int type1 = getIntent().getIntExtra("type", 0);
         if(type1==0){
-            refreshData(getAccountItems());
+            filterData(getAccountItems());
             segmentView.setActive(0);
         }else{
             segmentView.setActive(1);
-            refreshData(getBudgetItems());
+            filterData(getBudgetItems());
         }
     }
 
-    private void setViewClickListener(){
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//                Map<String, Object> item = (Map<String, Object>) parent.getAdapter().getItem(position);
-//                toEditPage(item);
+    private List<ExpandableItem> getCurrentDatas(){
+        Collection<ExpandableItem> items = myAdapter.getMap().values();
+        List<ExpandableItem> list = new ArrayList<ExpandableItem>();
+        list.addAll(items);
+        return list;
+    }
 
+    private void filterData(final List<Item> items){
+        List<Item> filteredItems = new ArrayList<Item>();
+        if(filter.isAttention){
+            for(Item item: items){
+                if(item.getAttention()==1){
+                    filteredItems.add(item);
+                }
             }
-        });
+        }else{
+            filteredItems = items;
+        }
+
+        List<ExpandableItem> expandableItems = processData(filteredItems);
+        sort(expandableItems);
     }
 
-    private List<HashMap<String,Object>> sort(final int flag,final String text, List<HashMap<String,Object>> items){
-        this.currentSortFlag = flag;
-        this.currentSortText = text;
-        boolean refresh = true;
-        if(items==null){
-            items = new ArrayList<HashMap<String, Object>>(currentViewData);
-        }else{
-            refresh = false;
-        }
-        if(flag!=0){
-            Collections.sort(items, new Comparator<HashMap<String, Object>>() {
+    private void sort(List<ExpandableItem> expandableItems){
+        if(filter.getPriceSort()!=0){
+            Collections.sort(expandableItems, new Comparator<ExpandableItem>() {
                 @Override
-                public int compare(HashMap<String, Object> lhs, HashMap<String, Object> rhs) {
-                    int i = compareObject(lhs.get("price"),rhs.get("price"));
-                    return flag==1?i:0-i;
+                public int compare(ExpandableItem lhs, ExpandableItem rhs) {
+                    int flag = lhs.getParent().getPrice() > rhs.getParent().getPrice() ? 1 : -1;
+                    if (filter.getPriceSort() == 1) {
+                        return flag;
+                    } else {
+                        return 0 - flag;
+                    }
                 }
             });
+
+            for(ExpandableItem item : expandableItems){
+                Collections.sort(item.getChildren(), new Comparator<Item>() {
+                    @Override
+                    public int compare(Item lhs, Item rhs) {
+                        int flag = lhs.getPrice() > rhs.getPrice() ? 1 : -1;
+                        if (filter.getPriceSort() == 1) {
+                            return flag;
+                        } else {
+                            return 0 - flag;
+                        }
+                    }
+                });
+            }
         }
-        ((TextView)this.findViewById(R.id.priceview)).setText(text);
-        if(refresh){
-            refreshView(items);
-        }
-        return items;
+
+        refreshView(expandableItems);
     }
 
-    private static int compareObject(Object l, Object m){
-        double ll = (Double)l;
-        double mm = (Double)m;
-        if(ll==mm){
-            return 0;
-        }else{
-            return ll-mm>0?1:-1;
+    private List<ExpandableItem> processData(final List<Item> items){
+        Map<String,ExpandableItem> expandableMap = new LinkedHashMap<String, ExpandableItem>();
+        List<ExpandableItem> list = new ArrayList<ExpandableItem>();
+        for(Item item: items){
+            ExpandableItem p = expandableMap.get(item.getSubject());
+            if(p == null){
+                p = new ExpandableItem(item.getSubject());
+                expandableMap.put(item.getSubject(), p);
+                list.add(p);
+            }
+            p.addChild(item);
         }
+        return list;
     }
 
-    private void refreshData(final List<Item> items){
-        data.clear();
-        for (Item i : items) {
-            HashMap<String, Object> item = new HashMap<String, Object>();
-            item.put("id", i.getId());
-            item.put("name", i.getName());
-            item.put("price", i.getPrice());
-            item.put("addDate", i.getAddDate());
-            item.put("remark", i.getRemark());
-            item.put("type",i.getType());
-            item.put("subject",i.getSubject());
-            item.put("attention",i.getAttention());
-            data.add(item);
+    private void refreshView(List<ExpandableItem> expandableItems){
+        Map<String,ExpandableItem> map = new LinkedHashMap<String, ExpandableItem>();
+        List<String> subjects = new ArrayList<String>();
+        for(ExpandableItem item: expandableItems){
+            map.put(item.getSubject(),item);
+            subjects.add(item.getSubject());
         }
-        refreshView(data);
-    }
-
-    private void refreshView(final List<HashMap<String, Object>> items){
-        this.currentViewData = items;
-        initTotal(items);
-        SimpleAdapter adapter = new MyAdapter(this, items, R.layout.items,
-                new String[]{"id", "name", "price", "addDate","attention"}, new int[]{R.id.id, R.id.name, R.id.price, R.id.addDate,R.id.attention_row});
+        initTotal(map);
+        MyExpandableListAdapter adapter = new MyExpandableListAdapter(map,subjects);
+        this.myAdapter = adapter;
         listView.setAdapter(adapter);
-    }
 
-    private void updateType(Map<String,Object> row){
-        if(type==DBManager.TYPE_BUDGET){
-            row.put("typeflag", DBManager.TYPE_ACCOUNT);
-        }else{
-            row.put("typeflag", DBManager.TYPE_BUDGET);
+        if(filter.isExpand()){
+            for(int i = 0; i < adapter.getGroupCount(); i++){
+                listView.expandGroup(i);
+            }
         }
-        toEditPage(row);
     }
 
-    private void toEditPage(Map<String, Object> row) {
+    private void toEditPage(Item item) {
         Intent intent = new Intent(this, EditItem.class);
         intent.putExtra("store", "from activityMain");
-        intent.putExtra("itemId", String.valueOf(row.get("id")));
-        if(row.get("typeflag")==null){
-            setType(intent);
-        }else{
-            intent.putExtra("type", (Integer) row.get("typeflag"));
-        }
+        intent.putExtra("itemId", String.valueOf(item.getId()));
+        setType(intent);
         startActivityForResult(intent, 1);
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
         finish();
@@ -492,10 +332,10 @@ public class MainActivity extends Activity {
         return true;
     }
 
-    private void initTotal(List<HashMap<String,Object>> datas) {
+    private void initTotal(final Map<String,ExpandableItem> map) {
         double m = 0;
-        for (Map<String, Object> row : datas) {
-            m += Double.parseDouble(String.valueOf(row.get("price")));
+        for (ExpandableItem row : map.values()) {
+            m += row.getParent().getPrice();
         }
         total.setText("总额:￥" + String.valueOf(m));
     }
@@ -524,48 +364,6 @@ public class MainActivity extends Activity {
                 getResources().getDisplayMetrics());
     }
 
-    private void showDeleteNotice(final String id,final int position){
-        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-        builder.setMessage("确定要删除该行?");
-        builder.setTitle("提示");
-        builder.setNegativeButton("确认", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                if (doDelete(id)) {
-                    data.remove(position);
-                    if (!data.isEmpty()) {
-                        refreshData(getItems());
-                    }
-                }
-                dialog.dismiss();
-            }
-        });
-        builder.setPositiveButton("取消", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-        builder.create().show();
-    }
-
-    private List<HashMap<String,Object>> getChildren(String subject){
-        List<HashMap<String,Object>> children = new ArrayList<HashMap<String, Object>>();
-        for(HashMap<String,Object> child: data){
-            if(subject.equals((String)child.get("subject"))){
-                if(isAttention){
-                    int f =  (Integer)child.get("attention");
-                    if(f==1){
-                        children.add(child);
-                    }
-                }else{
-                    children.add(child);
-                }
-            }
-        }
-        return children;
-    }
-
     /**
      * 捕捉back
      */
@@ -584,45 +382,167 @@ public class MainActivity extends Activity {
         dbManager.closeDB();
     }
 
+    class Filter{
+        private boolean isAttention;
 
-    class SubjectData{
-        private String subject;
-        private List<HashMap<String,Object>> datas;
+        private int priceSort = 0;
 
-        public SubjectData(String subject){
-            this.subject = subject;
+        private boolean isExpand = true;
+
+        public boolean isExpand() {
+            return isExpand;
         }
 
-        public String getSubject() {
-            return subject;
+        public void setIsExpand(boolean isExpand) {
+            this.isExpand = isExpand;
         }
 
-        public void setSubject(String subject) {
-            this.subject = subject;
+        public int getPriceSort() {
+            return priceSort;
         }
 
-        public void addData(HashMap<String,Object> data){
-            if(datas==null){
-                datas = new ArrayList<HashMap<String, Object>>();
+        public void setPriceSort(int priceSort) {
+            this.priceSort = priceSort;
+        }
+
+        public boolean isAttention() {
+            return isAttention;
+        }
+
+        public void setIsAttention(boolean isAttention) {
+            this.isAttention = isAttention;
+        }
+    }
+
+    class MyExpandableListAdapter extends BaseExpandableListAdapter {
+
+        private Map<String,ExpandableItem> map;
+
+        private List<String> subjects;
+
+        public Map<String,ExpandableItem> getMap(){
+            return map;
+        }
+
+        public MyExpandableListAdapter(Map<String,ExpandableItem> map,List<String> subjects){
+            this.map = map;
+            this.subjects = subjects;
+        }
+
+        //得到子item需要关联的数据
+        @Override
+        public Object getChild(int groupPosition, int childPosition) {
+            String subject = subjects.get(groupPosition);
+            return map.get(subject).getChildren().get(childPosition);
+        }
+
+        //得到子item的ID
+        @Override
+        public long getChildId(int groupPosition, int childPosition) {
+            return childPosition;
+        }
+
+        //设置子item的组件
+        @Override
+        public View getChildView(int groupPosition, int childPosition,
+                                 boolean isLastChild, View convertView, ViewGroup parent) {
+            try{
+
+                String subject = subjects.get(groupPosition);
+                Item item = map.get(subject).getChildren().get(childPosition);
+                if (convertView == null) {
+                    LayoutInflater inflater = (LayoutInflater) MainActivity.this
+                            .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    convertView = inflater.inflate(R.layout.expandable_list_children, null);
+                }
+                TextView tv = (TextView)convertView.findViewById(R.id.rowid);
+                tv.setText(String.valueOf(item.getId()));
+
+                tv = (TextView)convertView.findViewById(R.id.name);
+                tv.setText(item.getName());
+
+                tv = (TextView)convertView.findViewById(R.id.price);
+                tv.setText(String.valueOf(item.getPrice()));
+
+                tv = (TextView)convertView.findViewById(R.id.attention_row);
+                int attentionFlag = item.getAttention();
+                tv.setText("☆");
+                tv.setTextSize(26);
+                if(attentionFlag==1){
+                    tv.setTextColor(Color.parseColor("black"));
+                }else{
+                    tv.setTextColor(Color.parseColor("lightgrey"));
+                }
+            }catch (Exception e){
+                e.printStackTrace();
             }
-            datas.add(data);
+            return convertView;
         }
 
-        public HashMap<String,Object> toSubjectData(){
-            double total = 0;
-            for(HashMap<String,Object> row: datas){
-                total+=(Double)row.get("price");
-            }
-            HashMap<String,Object> item = new HashMap<String, Object>();
-            item.put("subject",subject);
-            item.put("id", 0);
-            item.put("name", subject);
-            item.put("price", total);
-            item.put("addDate", "");
-            item.put("remark", "");
-            item.put("type","");
-            item.put("attention",isAttention?1:0);
-            return item;
+        //获取当前父item下的子item的个数
+        @Override
+        public int getChildrenCount(int groupPosition) {
+            String subject = subjects.get(groupPosition);
+            return map.get(subject).getChildren().size();
         }
+        //获取当前父item的数据
+        @Override
+        public Object getGroup(int groupPosition) {
+            String subject = subjects.get(groupPosition);
+            return map.get(subject).getParent();
+        }
+
+        @Override
+        public int getGroupCount() {
+            return subjects.size();
+        }
+
+        @Override
+        public long getGroupId(int groupPosition) {
+            return groupPosition;
+        }
+        //设置父item组件
+        @Override
+        public View getGroupView(int groupPosition, boolean isExpanded,
+                                 View convertView, ViewGroup parent) {
+            if (convertView == null) {
+                LayoutInflater inflater = (LayoutInflater) MainActivity.this
+                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                convertView = inflater.inflate(R.layout.expandable_list_parent, null);
+            }
+            String subject = subjects.get(groupPosition);
+            Item item = map.get(subject).getParent();
+            TextView tv = (TextView)convertView.findViewById(R.id.p_rowid);
+            tv.setText("0");
+
+            tv = (TextView)convertView.findViewById(R.id.p_name);
+            tv.setText(item.getSubject());
+
+            tv = (TextView)convertView.findViewById(R.id.p_price);
+            tv.setText(String.valueOf(item.getPrice()));
+
+            tv = (TextView)convertView.findViewById(R.id.p_attention_row);
+            int attentionFlag = item.getAttention();
+            tv.setText("☆");
+            tv.setTextSize(26);
+            if(attentionFlag==1){
+                tv.setTextColor(Color.parseColor("black"));
+            }else{
+                tv.setTextColor(Color.parseColor("lightgrey"));
+            }
+
+            return convertView;
+        }
+
+        @Override
+        public boolean hasStableIds() {
+            return true;
+        }
+
+        @Override
+        public boolean isChildSelectable(int groupPosition, int childPosition) {
+            return true;
+        }
+
     }
 }
